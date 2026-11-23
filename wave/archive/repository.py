@@ -114,6 +114,18 @@ class ArchiveRepository:
                     (task_id, channel_id, canonical_json(record)))
         self._write("INSERT INTO delivery VALUES(?,0,0,?,0,0)", (task_id, first_index))
 
+    def insert_handoff(self, task_id, channel_id, record, frontier, next_index, events, points):
+        self._write("INSERT INTO tasks VALUES(?,?,?)", (task_id, channel_id, canonical_json(record)))
+        self._write("INSERT INTO delivery VALUES(?,?,0,?,0,?)",
+                    (task_id, frontier, next_index, len(events)))
+        for sequence, event in enumerate(events):
+            self._write("INSERT INTO events VALUES(?,?,?)",
+                        (task_id, sequence, canonical_json(event_record(event))))
+        for point in points:
+            self._write("INSERT INTO waveform VALUES(?,?,?,?,?)",
+                        (task_id, point.index, canonical_json(point.time),
+                         point.value, int(point.valid)))
+
     def load_delivery_state(self, task_id):
         row = self._one(
             "SELECT frontier,ended,next_index,sealed,event_count FROM delivery WHERE task_id=?",

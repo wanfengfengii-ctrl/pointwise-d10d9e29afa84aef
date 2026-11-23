@@ -2,6 +2,6 @@
   "version": 1,
   "kind": "cli",
   "setup": [],
-  "verify": ["python3.11", "-B", "run.py", "verify"],
-  "demo": ["python3.11", "-B", "run.py", "demo"]
+  "verify": ["python3.11", "-B", "handoff_cases.py", "verify"],
+  "demo": ["python3.11", "-B", "handoff_cases.py", "demo"]
 }

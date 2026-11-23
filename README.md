@@ -52,6 +52,12 @@ export_waveform(repo, task_id) 仅接受封存任务，返回排序确定的 JSO
 
 compute_windows(repo, task_id, windows) 返回并保存 WindowBatch，results 按请求顺序包含 task_id、source_id、ordinal、window、total、valid_count、coverage、rms。窗口是 TimeWindow 或两个有理端点，a<=b，选择 a<=time<b。保留重复窗口和空批次。覆盖率 k/n，n=0 时为 Fraction(0)；rms 只用 k 个有效值，k=0 时为 None。缩放和稳定求和避免平方溢出，手算正常例误差不超过 1e-10。未封存、反向或非法窗口抛 ValueError，缺任务抛 KeyError；整批保存或整批回滚。read_window_results(repo, batch_id) 读取固定已存指标，不重算。
 
+## 接班发行与异库验收
+
+export_handoff(repo, task_id) 从活动任务的已提交截面发行接班件 (packet, digest)，供独立归档离线续采。未知任务抛 KeyError，任务已封存抛 ValueError。packet 是可经 JSON 往返的字典：task 与封存导出的 task 结构相同，frontier 是原输入的下一接收位置，next_index 是下一可交付输出的绝对位置，points 沿用导出点记录并按绝对输出位排列；digest 是 canonical_json(packet) UTF-8 字节的 SHA-256 小写十六进制。basis_kind 为 positions：basis 每条按绝对 input_index 精确覆盖一个旧输入位，样本记 {"input_index", "kind": "sample", "value"}（有限双精度实数），明确缺测记 {"input_index", "kind": "gap"}；只携带 [0, frontier) 内被某个未发布输出位非零抽头引用的位置，该集合由固定口径、frontier 与 next_index 唯一决定。
+
+accept_handoff(other_repo, packet, expected_digest) 核对摘要、结构、绑定、游标、活动前缀的连续性和网格、应交依据的完整性与范围。同一通道绑定可复用；通道或任务口径冲突、目标已有同号任务、结构错误或摘要不符均抛 ValueError。验收为单次原子提交，SQLite 异常原样传播，失败整件回滚、可重新接收。接收成功才让任务和其旧点可读，返回值等于 read_waveform(other_repo, task_id)，旧点与波形来源标识同发行截面一致。接收库关闭重开后按原接口从 frontier 继续 push_event，交付时机、绝对位置、时间、有效性和值与原库收到同一事件时一致；封存后读取、导出和窗口质控沿原接口核对。
+
 ## 时间与支持域
 
 输入时间 ti+n/ri，输出时间 tm=to+m/ro，m 为非负整数。首个 m 满足 tm>=ti。对 u=(tm-ti)*ri，b=floor(u)，p=u-b，计算 sum(h(p,j)*x[b+j])。所有网格、相位及边界由 Fraction 精确决定。运输块不会重启相位。
