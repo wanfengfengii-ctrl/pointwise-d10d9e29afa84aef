@@ -1,0 +1,10 @@
+{
+  "python": "3.11+",
+  "dependencies": "standard-library-only",
+  "working_directory": "project-root",
+  "setup": [],
+  "verify": ["python3.11", "-B", "run.py", "verify"],
+  "demo": ["python3.11", "-B", "run.py", "demo"],
+  "exit_codes": {"success": 0, "business_test_failure": 1, "demo_error": 2},
+  "storage": "demo and disk regressions use their own temporary directories"
+}

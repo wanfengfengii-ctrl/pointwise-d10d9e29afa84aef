@@ -1,0 +1,20 @@
+{
+  "channel": {"channel_id": "north-bearing", "unit": "m/s²", "input_rate": 3},
+  "task": {
+    "task_id": "vibration-day",
+    "input_start": 0,
+    "output_start": 0,
+    "output_rate": 2,
+    "filter": [
+      {"phase": 0, "weights": [[-1, [1, 4]], [0, [1, 2]], [1, [1, 4]]]},
+      {"phase": [1, 2], "weights": [[-1, 0], [0, [1, 2]], [1, [1, 2]]]}
+    ]
+  },
+  "events": [
+    {"kind": "samples", "start": 0, "values": [2, 4]},
+    {"kind": "gap", "start": 2, "length": 1},
+    {"kind": "samples", "start": 3, "values": [8, 10]},
+    {"kind": "end", "start": 5}
+  ],
+  "windows": [[0, 1], [0, [3, 2]], [[1, 2], [3, 2]], [2, 2]]
+}
